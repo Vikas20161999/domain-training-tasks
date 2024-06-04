@@ -25,34 +25,66 @@ public class NumberPrintingThreads {
 ----------------------------------------------------------------------------------------------------
 2. states and transitions
 
-class ThreadLifecycleDemo {
+public class ThreadLifecycleDemo {
 
-    public static void main(String[] args) throws InterruptedException {
-        Thread thread = new Thread(() -> {
+    private static final Object lock = new Object();
+
+    public static void main(String[] args) {
+        Thread thread = new Thread(new LifecycleRunnable());
+
+        // NEW state
+        System.out.println("Thread state after creation: " + thread.getState());
+
+        thread.start();
+        // RUNNABLE state
+        System.out.println("Thread state after calling start(): " + thread.getState());
+
+        try {
+            // Ensure the thread starts and hits the synchronized block
+            Thread.sleep(100);
+
+            synchronized (lock) {
+                // Making sure the thread goes into WAITING state
+                lock.notify();
+            }
+
+            // Waiting for the thread to complete execution
+            thread.join();
+            // TERMINATED state
+            System.out.println("Thread state after completion: " + thread.getState());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static class LifecycleRunnable implements Runnable {
+        @Override
+        public void run() {
+            synchronized (lock) {
+                try {
+                    // WAITING state
+                    System.out.println("Thread state before waiting: " + Thread.currentThread().getState());
+                    lock.wait();
+                    System.out.println("Thread state after being notified: " + Thread.currentThread().getState());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
             try {
-                System.out.println("Thread State: " + Thread.currentThread().getState()); // RUNNABLE
-                synchronized (ThreadLifecycleDemo.class) {
-                    ThreadLifecycleDemo.class.wait(1000); // WAITING
-                }
-                Thread.sleep(500); // TIMED_WAITING
-                synchronized (ThreadLifecycleDemo.class) {
-                    ThreadLifecycleDemo.class.notify();
-                }
+                // TIMED_WAITING state
+                System.out.println("Thread state before sleep: " + Thread.currentThread().getState());
+                Thread.sleep(500);
+                System.out.println("Thread state after sleep: " + Thread.currentThread().getState());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        });
 
-        System.out.println("Thread State: " + thread.getState()); // NEW
-        thread.start();
-        Thread.sleep(200); // Allow thread to start
-        System.out.println("Thread State: " + thread.getState()); // RUNNABLE
-        synchronized (ThreadLifecycleDemo.class) {
-            ThreadLifecycleDemo.class.notify(); // Ensure main thread holds the monitor
-            Thread.sleep(100); // Make main thread wait and release monitor
+            synchronized (lock) {
+                // Just to demonstrate BLOCKED state
+                System.out.println("Thread state inside synchronized block: " + Thread.currentThread().getState());
+            }
         }
-        thread.join(); // TERMINATED
-        System.out.println("Thread State: " + thread.getState()); // TERMINATED
     }
 }
 
