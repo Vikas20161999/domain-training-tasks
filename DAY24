@@ -1,0 +1,177 @@
+1.
+
+---------------------------------------------------------------------------------------------------------
+
+2. 
+
+----------------------------------------------------------------------------------------------------------------
+
+3. Reflection API
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+public class ReflectionDemo {
+
+    private static class Person {
+        private String name;
+        private int age;
+
+        public Person() {
+        }
+
+        public Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        private void printPerson() {
+            System.out.println("Name: " + name + ", Age: " + age);
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            Class<?> personClass = Class.forName("ReflectionDemo$Person");
+
+            // Inspect constructors
+            Constructor<?>[] constructors = personClass.getDeclaredConstructors();
+            System.out.println("Constructors:");
+            for (Constructor<?> constructor : constructors) {
+                System.out.println(constructor);
+            }
+
+            // Inspect fields
+            Field[] fields = personClass.getDeclaredFields();
+            System.out.println("\nFields:");
+            for (Field field : fields) {
+                System.out.println(field);
+            }
+
+            // Inspect methods
+            Method[] methods = personClass.getDeclaredMethods();
+            System.out.println("\nMethods:");
+            for (Method method : methods) {
+                System.out.println(method);
+            }
+
+            // Modify private field access
+            Person person = new Person();
+            Field ageField = personClass.getDeclaredField("age");
+            ageField.setAccessible(true);
+            ageField.set(person, 30);
+
+            // Verify the modification
+            Method printPersonMethod = personClass.getDeclaredMethod("printPerson");
+            printPersonMethod.setAccessible(true);
+            printPersonMethod.invoke(person);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+-----------------------------------------------------------------------------------------------------------------
+
+4.Lambda Expressions
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String toString() {
+        return name + ": " + age;
+    }
+}
+
+public class LambdaComparator {
+    public static void main(String[] args) {
+        List<Person> people = new ArrayList<>();
+        people.add(new Person("Alice", 30));
+        people.add(new Person("Bob", 25));
+        people.add(new Person("Charlie", 35));
+
+        // Sorting using lambda expression
+        Collections.sort(people, (p1, p2) -> Integer.compare(p1.getAge(), p2.getAge()));
+
+        // Print sorted list
+        people.forEach(System.out::println);
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------
+
+5. Functional Interfaces
+
+import java.util.function.Predicate;
+import java.util.function.Function;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{name='" + name + "', age=" + age + "}";
+    }
+}
+
+public class FunctionalInterfacesDemo {
+
+    public static void main(String[] args) {
+        Person person = new Person("John Doe", 20);
+
+        // Predicate: Test if person's age is over 18
+        Predicate<Person> isAdult = p -> p.getAge() > 18;
+        System.out.println("Is adult: " + isAdult.test(person));
+
+        // Function: Get the person's name
+        Function<Person, String> getName = Person::getName;
+        System.out.println("Name: " + getName.apply(person));
+
+        // Consumer: Print the person's details
+        Consumer<Person> printPerson = p -> System.out.println("Person: " + p);
+        printPerson.accept(person);
+
+        // Supplier: Provide a new person
+        Supplier<Person> personSupplier = () -> new Person("Jane Doe", 22);
+        System.out.println("New person: " + personSupplier.get());
+    }
+}
+
