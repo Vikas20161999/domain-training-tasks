@@ -75,64 +75,67 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class ReflectionDemo {
-
-    private static class Person {
-        private String name;
-        private int age;
-
-        public Person() {
-        }
-
-        public Person(String name, int age) {
-            this.name = name;
-            this.age = age;
-        }
-
-        private void printPerson() {
-            System.out.println("Name: " + name + ", Age: " + age);
-        }
-    }
+public class ReflectionExample {
 
     public static void main(String[] args) {
         try {
-            Class<?> personClass = Class.forName("ReflectionDemo$Person");
+            // Define a SampleClass for demonstration
+            Class<?> sampleClass = SampleClass.class;
 
-            // Inspect constructors
-            Constructor<?>[] constructors = personClass.getDeclaredConstructors();
+            // Inspecting constructors
+            Constructor<?>[] constructors = sampleClass.getDeclaredConstructors();
             System.out.println("Constructors:");
             for (Constructor<?> constructor : constructors) {
                 System.out.println(constructor);
             }
 
-            // Inspect fields
-            Field[] fields = personClass.getDeclaredFields();
-            System.out.println("\nFields:");
-            for (Field field : fields) {
-                System.out.println(field);
-            }
-
-            // Inspect methods
-            Method[] methods = personClass.getDeclaredMethods();
-            System.out.println("\nMethods:");
+            // Inspecting methods
+            Method[] methods = sampleClass.getDeclaredMethods();
+            System.out.println("Methods:");
             for (Method method : methods) {
                 System.out.println(method);
             }
 
-            // Modify private field access
-            Person person = new Person();
-            Field ageField = personClass.getDeclaredField("age");
-            ageField.setAccessible(true);
-            ageField.set(person, 30);
+            // Inspecting fields
+            Field[] fields = sampleClass.getDeclaredFields();
+            System.out.println("Fields:");
+            for (Field field : fields) {
+                System.out.println(field);
+            }
 
-            // Verify the modification
-            Method printPersonMethod = personClass.getDeclaredMethod("printPerson");
-            printPersonMethod.setAccessible(true);
-            printPersonMethod.invoke(person);
+            // Modify the access level of the private field and set its value
+            Field privateField = sampleClass.getDeclaredField("privateField");
+            privateField.setAccessible(true); // Bypass the private access modifier
+
+            // Create an instance of SampleClass
+            SampleClass instance = new SampleClass();
+
+            // Set the value of the private field
+            privateField.set(instance, "Modified Value");
+
+            // Get the value of the private field to verify it was changed
+            String fieldValue = (String) privateField.get(instance);
+            System.out.println("Modified privateField value: " + fieldValue);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+}
+
+// SampleClass definition
+class SampleClass {
+    private String privateField = "Initial Value";
+
+    public SampleClass() {
+    }
+
+    private void privateMethod() {
+        System.out.println("Private Method Called");
+    }
+
+    public void publicMethod() {
+        System.out.println("Public Method Called");
     }
 }
 
