@@ -267,4 +267,130 @@ public class SimpleHttpClient {
 10. Java Networking and Serialization
 
 
+Serializable Object
+
+import java.io.Serializable;
+
+public class OperationRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private double number1;
+    private double number2;
+    private String operation;
+
+    public OperationRequest(double number1, double number2, String operation) {
+        this.number1 = number1;
+        this.number2 = number2;
+        this.operation = operation;
+    }
+
+    public double getNumber1() {
+        return number1;
+    }
+
+    public double getNumber2() {
+        return number2;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+}
+
+
+-----In the same Program 
+
+Server Code
+
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class TCPServer {
+    public static void main(String[] args) {
+        int port = 12345; // Port number for the server to listen on
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Server is listening on port " + port);
+
+            while (true) {
+                try (Socket socket = serverSocket.accept();
+                     ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+                     ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream())) {
+
+                    // Read the operation request object from the client
+                    OperationRequest request = (OperationRequest) objectInputStream.readObject();
+
+                    // Perform the operation
+                    double result = performOperation(request.getNumber1(), request.getNumber2(), request.getOperation());
+
+                    // Send the result back to the client
+                    objectOutputStream.writeObject(result);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static double performOperation(double number1, double number2, String operation) {
+        switch (operation) {
+            case "+":
+                return number1 + number2;
+            case "-":
+                return number1 - number2;
+            case "*":
+                return number1 * number2;
+            case "/":
+                if (number2 != 0) {
+                    return number1 / number2;
+                } else {
+                    throw new ArithmeticException("Division by zero");
+                }
+            default:
+                throw new IllegalArgumentException("Invalid operation: " + operation);
+        }
+    }
+}
+
+
+-----In the same program 
+
+Client Code
+
+import java.io.*;
+import java.net.Socket;
+
+public class TCPClient {
+    public static void main(String[] args) {
+        String hostname = "localhost";
+        int port = 12345; // Port number the server is listening on
+
+        try (Socket socket = new Socket(hostname, port);
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream())) {
+
+            // Create an OperationRequest object
+            OperationRequest request = new OperationRequest(2, 2, "+");
+
+            // Send the request to the server
+            objectOutputStream.writeObject(request);
+
+            // Read the result from the server
+            double result = (double) objectInputStream.readObject();
+
+            System.out.println("Result: " + result);
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+
 
