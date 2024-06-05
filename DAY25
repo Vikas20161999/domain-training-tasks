@@ -1,0 +1,162 @@
+4. 
+
+package com.javaio;
+ 
+import java.io.File;
+ 
+// To list all the files and directory of given directory
+public class FileExample2 {
+public static void main(String[] args) {
+  File f=new File("E:\\MariaFolder");
+  int count=0;
+  String[] s=f.list();
+  for(String s1:s) {
+    count=count+1;
+    System.out.println(s1);
+  }
+  System.out.println("Count of files "+count);
+}
+}
+
+----------------------------------------------------------------------------------------
+
+5.
+
+package com.javaio;
+ 
+import java.io.File;
+ 
+public class FileExample3 {
+  public static void main(String[] args) {
+    int count=0;
+    File f=new File("E:\\MariaFolder");
+    
+    String[] s=f.list();
+    for(String s1:s) {
+      File f1=new File(f,s1);
+      if(f1.isDirectory()) {
+        //if(f1.isFile()) {
+          count++;
+        System.out.println(s1);
+        }
+      
+      
+    }
+    System.out.println(count);
+  }
+}
+
+
+---------------------------------------------------------------------------------------------
+
+6. count each word
+
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class WordFrequencyCounter {
+    public static void main(String[] args) {
+        // Path to the input file
+        String inputFilePath = "path/to/your/inputfile.txt";
+        // Path to the output file
+        String outputFilePath = "path/to/your/outputfile.txt";
+
+        // HashMap to store word frequencies
+        Map<String, Integer> wordCountMap = new HashMap<>();
+
+        // Try-with-resources to automatically close the FileReader
+        try (FileReader reader = new FileReader(inputFilePath)) {
+            StringBuilder content = new StringBuilder();
+            int character;
+
+            // Read each character from the file and append to the StringBuilder
+            while ((character = reader.read()) != -1) {
+                content.append((char) character);
+            }
+
+            // Convert content to lowercase and split into words using non-word characters
+            String[] words = content.toString().toLowerCase().split("\\W+");
+
+            // Count each word
+            for (String word : words) {
+                if (!word.isEmpty()) {
+                    // Increment the word count in the HashMap
+                    wordCountMap.put(word, wordCountMap.getOrDefault(word, 0) + 1);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Try-with-resources to automatically close the FileWriter
+        try (FileWriter writer = new FileWriter(outputFilePath)) {
+            // Write the word frequencies to the output file
+            for (Map.Entry<String, Integer> entry : wordCountMap.entrySet()) {
+                writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+7. serialization and deserialization
+
+import java.io.*;
+
+public class SerializeDeserializeExample {
+    public static void main(String[] args) {
+        // Create and serialize a Person object
+        Person person = new Person("John Doe", 30);
+        String filename = "person.ser";
+
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename))) {
+            out.writeObject(person);
+            System.out.println("Serialized data is saved in " + filename);
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+
+        // Deserialize the Person object
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename))) {
+            Person deserializedPerson = (Person) in.readObject();
+            System.out.println("Deserialized Person: " + deserializedPerson);
+        } catch (IOException | ClassNotFoundException i) {
+            i.printStackTrace();
+        }
+    }
+}
+
+class Person implements Serializable {
+    private static final long serialVersionUID = 1L; // Version control for the serialization process
+
+    private String name;
+    private int age;
+
+    // Constructor
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // Getter methods
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{name='" + name + "', age=" + age + "}";
+    }
+}
+
+
